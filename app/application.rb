@@ -1,24 +1,34 @@
 
 class Application
 
+# Your application should only accept the /items/<ITEM NAME> route. Everything else should 404
   def call(env)
-    resp = Rack::Response.new
-    req = Rack::Request.new(env)
+    response = Rack::Response.new
+    request = Rack::Request.new(env)
 
-    if req.path.match(/items/)
-      item_name = req.path.split("/items/").last
-      item = @@items.find { |i| i.name == item_name }
+    if request.path.match(/items/)
+      item_name = request.path.split("/items/").last
+      ##turn /items/something into something
+      item = @@items.find { |item| item.name == item_name }
+      # 如果 item，
+      # 也就是 @@items.find { |item| item.name == item_name }
+        # https://blog.csdn.net/weixin_33807284/article/details/92367062
+        # find返回满足条件的第一条记录，而select返回满足条件的全部记录
+      # 被找出来了 =》 存在
       if item
-        resp.write item.price
-        resp.status = 200
+      # If a user requests /items/<Item Name> 
+      # it should return the price of that item
+      response.write item.price
+      response.status = 200
       else
-        resp.write "Item not found"
-        resp.status = 400
+# IF a user requests an item that you don't have, then return a 400 and an error message
+      response.write "Item not found"
+      response.status = 400
       end
     else
-      resp.write "Route not found"
-      resp.status = 404
+      response.write "Route not found"
+      response.status = 404
     end
-    resp.finish
+    response.finish
   end
 end
